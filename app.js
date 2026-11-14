@@ -449,6 +449,30 @@ window.addEventListener('storage', (e) => { if (e.key === KEY) { S = load(); sho
 show();
 
 /* ---------- offline ---------- */
+// New version: the new sw.js calls skipWaiting() + clients.claim(), the page reloads itself once.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller; // first install: no reload
+  let reloading = false;
+  const reloadNow = () => { if (!reloading) { reloading = true; location.reload(); } };
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) return;
+    // don't throw away a half-typed item: wait until the input bar loses focus
+    if (bar.contains(document.activeElement)) {
+      bar.addEventListener('focusout', () => setTimeout(() => {
+        if (!bar.contains(document.activeElement)) reloadNow();
+      }, 0));
+    } else {
+      reloadNow();
+    }
+  });
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+      // an installed app is often resumed, not reopened: check again when it comes back to the front
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update().catch(() => {});
+      });
+    }).catch(() => {});
+  });
 }

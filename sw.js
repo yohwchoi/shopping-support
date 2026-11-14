@@ -1,5 +1,5 @@
 // Cart Ring service worker — app files from cache so the app opens with weak or no signal.
-const VERSION = 'v2';
+const VERSION = 'v3';
 const APP_CACHE = 'cartring-app-' + VERSION;
 const FONT_CACHE = 'cartring-fonts';
 const APP_FILES = [
@@ -16,7 +16,12 @@ const APP_FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(APP_CACHE).then((c) => c.addAll(APP_FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' = skip the browser's HTTP cache (GitHub Pages keeps files 10 min), so a new version is really new
+  e.waitUntil(
+    caches.open(APP_CACHE)
+      .then((c) => c.addAll(APP_FILES.map((u) => new Request(u, { cache: 'reload' }))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -53,7 +58,7 @@ self.addEventListener('fetch', (e) => {
       try {
         const ctrl = new AbortController();
         const timer = setTimeout(() => ctrl.abort(), 2500);
-        const res = await fetch(req, { signal: ctrl.signal });
+        const res = await fetch(req, { signal: ctrl.signal, cache: 'no-cache' });
         clearTimeout(timer);
         if (res.ok) cache.put(req, res.clone());
         return res;

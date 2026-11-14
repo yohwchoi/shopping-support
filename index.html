@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Budget vs spent, while you shop.">
+<title>Cart Ring</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+KR:wght@400;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="app">
+
+  <!-- ① New trip -->
+  <section id="start" class="screen" hidden>
+    <h1 class="title">New trip</h1>
+    <p class="sub">Set your budget before you shop.</p>
+
+    <div class="field">
+      <label for="s-store">Store</label>
+      <input id="s-store" class="soft" autocomplete="off" autocapitalize="words" enterkeyhint="next" placeholder="Costco">
+    </div>
+
+    <div class="field">
+      <label for="s-budget">Budget</label>
+      <div class="suffixed big">
+        <input id="s-budget" inputmode="decimal" autocomplete="off" enterkeyhint="go" placeholder="300">
+        <div class="ghost" aria-hidden="true"><span class="ghost-text"></span><span class="suffix">,000</span></div>
+      </div>
+      <div class="hint" id="s-hint">Type 300 for ₩300,000</div>
+    </div>
+
+    <div class="grow"></div>
+
+    <div id="last" hidden>
+      <div class="hint">Last trip</div>
+      <div class="last-row"><span id="last-where"></span><span id="last-amt" class="num muted"></span></div>
+    </div>
+
+    <button id="s-go" class="primary">Start shopping</button>
+  </section>
+
+  <!-- ② Shopping -->
+  <section id="shop" class="screen" hidden>
+    <header class="top">
+      <div id="store-name" class="store"></div>
+      <button id="budget-btn" class="pill num"></button>
+    </header>
+
+    <div class="ringbox">
+      <svg viewBox="0 0 250 250" aria-hidden="true">
+        <circle cx="125" cy="125" r="100" class="track" stroke-width="22"></circle>
+        <circle cx="125" cy="125" r="100" class="arc" id="ring-arc" stroke-width="22" transform="rotate(-90 125 125)"></circle>
+      </svg>
+      <div class="ring-text">
+        <div class="ring-label" id="ring-label">Left</div>
+        <div class="ring-num num" id="ring-num">0</div>
+        <div class="ring-sub num" id="ring-sub"></div>
+      </div>
+    </div>
+
+    <div class="compact">
+      <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+        <circle cx="26" cy="26" r="20" class="track" stroke-width="7"></circle>
+        <circle cx="26" cy="26" r="20" class="arc" id="mini-arc" stroke-width="7" transform="rotate(-90 26 26)"></circle>
+      </svg>
+      <div>
+        <div class="mini-num num"><span id="mini-num">0</span> <span class="mini-unit" id="mini-unit">left</span></div>
+        <div class="mini-sub num" id="mini-sub"></div>
+      </div>
+    </div>
+
+    <div class="meta"><span id="count">0 items</span><span>Swipe left to delete</span></div>
+
+    <div class="list" id="list"></div>
+
+    <div class="bar" id="bar">
+      <div class="bar-name">
+        <label for="in-name">Name</label>
+        <input id="in-name" autocomplete="off" autocorrect="off" enterkeyhint="next" placeholder="chicken">
+      </div>
+      <div class="bar-amt">
+        <label for="in-amt">Amount</label>
+        <div class="suffixed right">
+          <input id="in-amt" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="36">
+          <span class="suffix">,000</span>
+        </div>
+      </div>
+      <button id="add-btn" class="add" aria-label="Add item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+  </section>
+</main>
+
+<!-- Edit item -->
+<dialog id="dlg-item">
+  <form method="dialog" id="f-item">
+    <h2>Edit item</h2>
+    <div class="field">
+      <label for="e-name">Name</label>
+      <input id="e-name" class="soft" autocomplete="off" enterkeyhint="next" placeholder="No name">
+    </div>
+    <div class="field">
+      <label for="e-amt">Amount</label>
+      <div class="suffixed">
+        <input id="e-amt" class="soft" inputmode="decimal" autocomplete="off" enterkeyhint="done">
+        <div class="ghost" aria-hidden="true"><span class="ghost-text"></span><span class="suffix">,000</span></div>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <button type="button" class="danger-link" id="e-del">Delete</button>
+      <span class="grow"></span>
+      <button type="button" class="ghost-btn" data-close>Cancel</button>
+      <button value="ok" class="primary sm" id="e-save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Edit budget -->
+<dialog id="dlg-budget">
+  <form method="dialog">
+    <h2>Budget</h2>
+    <div class="field">
+      <label for="b-amt">Budget</label>
+      <div class="suffixed big">
+        <input id="b-amt" inputmode="decimal" autocomplete="off" enterkeyhint="done">
+        <div class="ghost" aria-hidden="true"><span class="ghost-text"></span><span class="suffix">,000</span></div>
+      </div>
+    </div>
+    <div class="dlg-btns">
+      <span class="grow"></span>
+      <button type="button" class="ghost-btn" data-close>Cancel</button>
+      <button value="ok" class="primary sm">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Finish trip -->
+<dialog id="dlg-finish">
+  <form method="dialog">
+    <h2>Finish trip?</h2>
+    <p class="sub" id="finish-text"></p>
+    <div class="dlg-btns">
+      <span class="grow"></span>
+      <button type="button" class="ghost-btn" data-close>Keep shopping</button>
+      <button value="ok" class="primary sm">Finish</button>
+    </div>
+  </form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>

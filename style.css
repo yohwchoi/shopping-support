@@ -148,7 +148,7 @@ input::placeholder { color: #9aa6b1; }
 .bar-name { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .bar-amt { width: 118px; flex-shrink: 0; display: flex; flex-direction: column; gap: 4px; }
 .bar-name:focus-within label, .bar-amt:focus-within label { color: var(--main-text); font-weight: 700; }
-.bar-amt input { padding: 0 52px 0 14px; }
+.bar-amt input { padding: 0 14px; }
 .bar-amt input:focus { font-weight: 700; }
 .suffixed.right .suffix { position: absolute; right: 14px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 16px; color: var(--faint); pointer-events: none; }
 .add {

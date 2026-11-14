@@ -1,5 +1,5 @@
 // Cart Ring service worker — app files from cache so the app opens with weak or no signal.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP_CACHE = 'cartring-app-' + VERSION;
 const FONT_CACHE = 'cartring-fonts';
 const APP_FILES = [
